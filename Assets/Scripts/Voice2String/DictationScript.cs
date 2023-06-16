@@ -20,7 +20,13 @@ public class DictationScript : MonoBehaviour{
 
     private DictationRecognizer m_DictationRecognizer;
 
+    // 形態素解析用ライブラリNMeCabの自作ライブラリ
+    NMeCab_Script mecab = null;
+
     void Start(){
+        // NMeCabのライブラリのコンストラクタを走らせる
+        mecab = new NMeCab_Script();
+
         // 表示器のinit
         m_Recognitions.text = "";
         m_Hypotheses.text = "";
@@ -31,10 +37,12 @@ public class DictationScript : MonoBehaviour{
 
         // 各結果を得た後の動作設定？
         // フレーズが特定の認識精度で認識されたことを示すイベント
+        // これが出力する結果が聞き取った文字列
         m_DictationRecognizer.DictationResult += (text, confidence) =>{
             Debug.LogFormat("Dictation Result: {0}", text);
             m_Recognitions.text += text + "\n";
             m_Hypotheses.text = "";
+            List<string[]> txt = mecab.Parse(text);
         };
 
         // Recognizerが現在のフラグメントに対して仮説変更をするときにトリガされるイベント
@@ -73,19 +81,23 @@ public class DictationScript : MonoBehaviour{
         m_DictationRecognizer.Start();
     }
 
+    /*
+    null referense exceptionを返すのでとりあえずコメントアウト
+    */
     // アプリ終了時実行の関数
     void OnApplicationQuit() {
         // 音声認識がまだ生きてたら殺す
-        if(m_DictationRecognizer.Status != SpeechSystemStatus.Stopped){
-            m_DictationRecognizer.Stop();
+        if(this.m_DictationRecognizer.Status != SpeechSystemStatus.Stopped){
+            this.m_DictationRecognizer.Stop();
         }
     }
 
     // オブジェクト破棄時実行の関数
     private void OnDestroy() {
         // 音声認識がまだ生きてたら殺す
-        if(m_DictationRecognizer.Status != SpeechSystemStatus.Stopped){
-            m_DictationRecognizer.Stop();
+        if(this.m_DictationRecognizer.Status != SpeechSystemStatus.Stopped){
+            this.m_DictationRecognizer.Stop();
         }
     }
+    //*/
 }
