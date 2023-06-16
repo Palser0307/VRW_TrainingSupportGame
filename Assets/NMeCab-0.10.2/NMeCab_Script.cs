@@ -46,6 +46,12 @@ public class NMeCab_Script : MonoBehaviour{
 
     // 与えられた日本語の文章を形態素解析する
     // 返り値がnullだったら処理失敗してるよ
+    //
+    // 返り値Listの中のstring[]に関して
+    // [0]: 表層形 そのままの形
+    // [1]: 品詞   名詞，動詞，とか
+    // [2]: 読み   読み方をカタカナで
+    // [3]: 原形   「住み」->「住む」
     public List<string[]> Parse(string sentense){
         // とりあえずsentenseが空だったらnullを返して終了
         if(sentense == "" || sentense == null){
@@ -66,10 +72,11 @@ public class NMeCab_Script : MonoBehaviour{
         // 解析結果から必要な部分を取り出す
         foreach(var node in nodes){
             // とりあえず標準出力
-            Debug.LogFormat("表層形: {0}\n品詞  : {1}\n読み  : {2}",node.Surface,node.GetFeatureAt(0),node.GetFeatureAt(8));
+            Debug.LogFormat("表層形: {0}\n品詞  : {1}\n読み  : {2}\n原形  : {3}",node.Surface,node.GetFeatureAt(0),node.GetFeatureAt(8),node.GetFeatureAt(6));
 
             // 返り値に格納する
-            string[] str_temp = {node.Surface, node.GetFeatureAt(0),node.GetFeatureAt(8)};
+            // 表層形，品詞，読み，原形 を格納
+            string[] str_temp = {node.Surface, node.GetFeatureAt(0),node.GetFeatureAt(8),node.GetFeatureAt(6)};
             return_temp.Add(str_temp);
         }
 
