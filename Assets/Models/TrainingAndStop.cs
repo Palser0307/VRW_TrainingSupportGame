@@ -19,11 +19,22 @@ public class TrainingAndStop : MonoBehaviour{
         //stop_training_readOnly = animator.GetBool("exitFlag");
         //Debug.Log(animator.GetCurrentAnimatorStateInfo(0).IsName("Training"));
     }
-    void start_training(){
+    public void start_training(){
         animator.SetTrigger("training_Trigger");
     }
-    void stop_training(){
+    public void stop_training(){
         //animator.SetBool("exitFlag",true);
         animator.SetTrigger("wait_Trigger");
+    }
+    public string getCurrentState(){
+        if(this.animator.GetCurrentAnimatorStateInfo(0).IsName("Training")){
+            return "Training";
+        }
+
+        if(this.animator.GetCurrentAnimatorStateInfo(0).IsName("Wait")){
+            return "Wait";
+        }
+
+        return "";
     }
 }

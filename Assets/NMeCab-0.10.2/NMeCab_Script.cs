@@ -72,7 +72,7 @@ public class NMeCab_Script : MonoBehaviour{
         // 解析結果から必要な部分を取り出す
         foreach(var node in nodes){
             // とりあえず標準出力
-            Debug.LogFormat("表層形: {0}\n品詞  : {1}\n読み  : {2}\n原形  : {3}",node.Surface,node.GetFeatureAt(0),node.GetFeatureAt(8),node.GetFeatureAt(6));
+            //Debug.LogFormat("表層形: {0}\n品詞  : {1}\n読み  : {2}\n原形  : {3}",node.Surface,node.GetFeatureAt(0),node.GetFeatureAt(8),node.GetFeatureAt(6));
 
             // 返り値に格納する
             // 表層形，品詞，読み，原形 を格納
@@ -81,6 +81,11 @@ public class NMeCab_Script : MonoBehaviour{
         }
 
         return return_temp;
+    }
+
+    public int CalculateScoreFromTokenizedSentence(List<string[]> _tokenized_sentence){
+        int score = _tokenized_sentence.Count;
+        return score;
     }
 /*
 ログ代わりの最初期版
