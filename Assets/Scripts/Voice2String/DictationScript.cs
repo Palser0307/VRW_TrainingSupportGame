@@ -139,8 +139,8 @@ public class DictationScript : MonoBehaviour{
                 continue;
             }
             for(int j=0;j<_tokenizedSentence.Count;j++){
-                // [2]が読み（ひらがな）
-                if(this.flagWords[i].keyword == _tokenizedSentence[j][2]){
+                // [2]が読み（カタカナ）
+                if(this.flagWords[i].keyword == _tokenizedSentence[j][3]){
                     this.flagWords[i].isExist = true;
                 }
             }
@@ -154,11 +154,17 @@ public class DictationScript : MonoBehaviour{
     public bool CheckFlagWord(string _keyword){
         List<string[]> _tokenized_keyword_list = mecab.Parse(_keyword);
         string _tokenized_keyword = _tokenized_keyword_list[0][3];
+        int num = 0;
         for(int i = 0; i < this.flagWords.Count; i++){
             if(this.flagWords[i].keyword == _tokenized_keyword){
-                return this.flagWords[i].isExist;
+                bool _temp = this.flagWords[i].isExist;
+                //Debug.Log("check flag word: "+_temp+"");
+                //return this.flagWords[i].isExist;
+                num = i;
+                break;
             }
         }
+        Debug.Log("check flag word: "+this.flagWords[num].isExist);
         return false;
     }
     public bool DeleteFlagWord(string _keyword){
