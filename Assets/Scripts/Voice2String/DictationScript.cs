@@ -139,7 +139,8 @@ public class DictationScript : MonoBehaviour{
                 continue;
             }
             for(int j=0;j<_tokenizedSentence.Count;j++){
-                if(this.flagWords[i].keyword == _tokenizedSentence[j][3]){
+                // [2]が読み（ひらがな）
+                if(this.flagWords[i].keyword == _tokenizedSentence[j][2]){
                     this.flagWords[i].isExist = true;
                 }
             }
