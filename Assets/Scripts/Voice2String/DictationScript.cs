@@ -46,6 +46,7 @@ public class DictationScript : MonoBehaviour{
     }
 
     // フラグになるキーワードを持つか
+    [SerializeField]
     private List<FlagWord> flagWords = null;
 
     void Start(){
@@ -76,12 +77,12 @@ public class DictationScript : MonoBehaviour{
 
         // init
         // Start()内じゃないといけないらしい
-        m_DictationRecognizer = new DictationRecognizer();
+        this.m_DictationRecognizer = new DictationRecognizer();
 
         // 各結果を得た後の動作設定？
         // フレーズが特定の認識精度で認識されたことを示すイベント
         // これが出力する結果が聞き取った文字列
-        m_DictationRecognizer.DictationResult += (text, confidence) =>{
+        this.m_DictationRecognizer.DictationResult += (text, confidence) =>{
             Debug.LogFormat("Dictation Result: {0}", text);
             //m_Recognitions.text += text + "\n";
             m_Recognitions.text = text;
@@ -95,7 +96,7 @@ public class DictationScript : MonoBehaviour{
 
         // Recognizerが現在のフラグメントに対して仮説変更をするときにトリガされるイベント
         // ざっくり言うと，今わかってるとこを出力するようにしてる
-        m_DictationRecognizer.DictationHypothesis += (text) =>{
+        this.m_DictationRecognizer.DictationHypothesis += (text) =>{
             Debug.LogFormat("Dictation hypothesis: {0}", text);
             if(is_HypothesesUGUI_active){
                 m_Hypotheses.text += text + "\n";
@@ -104,34 +105,43 @@ public class DictationScript : MonoBehaviour{
 
         // 音声認識セッションを終了した時にトリガされるイベント
         // セッションタイムアウトもここに来る
-        m_DictationRecognizer.DictationComplete += (completionCause) =>{
+        this.m_DictationRecognizer.DictationComplete += (completionCause) =>{
             if(completionCause != DictationCompletionCause.Complete){
                 Debug.LogErrorFormat("Dictation completed unsuccessfully: {0}", completionCause);
-                m_DictationRecognizer.Start();
+                this.m_DictationRecognizer.Start();
             }
             // とりあえずタイムアウトだったらセッションの再起動
             if(completionCause == DictationCompletionCause.TimeoutExceeded){
-                m_DictationRecognizer.Start();
+                this.m_DictationRecognizer.Start();
             }
         };
 
         // 音声認識セッションにエラーが発生したときにトリガされるイベント
-        m_DictationRecognizer.DictationError += (error, hresult) =>{
+        this.m_DictationRecognizer.DictationError += (error, hresult) =>{
             Debug.LogErrorFormat("Dictation ERROR: {0}; HResult = {1}", error, hresult);
         };
 
         // 待機時間の再設定 (float)
         // default: 5 second
-        m_DictationRecognizer.InitialSilenceTimeoutSeconds = 2.0f;
+        this.m_DictationRecognizer.InitialSilenceTimeoutSeconds = 2.0f;
 
         // 現セッション中待機時間 (float)
         // default: 20 second
-        m_DictationRecognizer.AutoSilenceTimeoutSeconds = 30.0f;
+        this.m_DictationRecognizer.AutoSilenceTimeoutSeconds = 30.0f;
 
         // セッション開始
-        m_DictationRecognizer.Start();
+        this.m_DictationRecognizer.Start();
     }
 
+    void Update() {
+        if(this.m_DictationRecognizer.Status == SpeechSystemStatus.Stopped){
+            this.m_DictationRecognizer.Start();
+        }
+    }
+
+    // 認識した発言をMeCabでParseした形態素のリスト_tokenizedSentenceに
+    // キーワードが含まれていないか確認
+    // 計算時間はO(n^2) 多分ね
     void FlagCheck(List<string[]> _tokenizedSentence){
         //this.flagWords.Count
         for(int i=0;i<this.flagWords.Count;i++){
@@ -140,6 +150,7 @@ public class DictationScript : MonoBehaviour{
             }
             for(int j=0;j<_tokenizedSentence.Count;j++){
                 // [2]が読み（カタカナ）
+                // [3]が原形（漢字含む）
                 if(this.flagWords[i].keyword == _tokenizedSentence[j][3]){
                     this.flagWords[i].isExist = true;
                 }
@@ -151,10 +162,17 @@ public class DictationScript : MonoBehaviour{
         string _tokenized_keyword = _tokenized_keyword_list[0][3];
         flagWords.Add(new FlagWord(_tokenized_keyword));
     }
+
+    // 与えられたキーワードがisExist=Trueになっているか
+    // 計算時間はO(n)ぐらいのはず
     public bool CheckFlagWord(string _keyword){
         List<string[]> _tokenized_keyword_list = mecab.Parse(_keyword);
         string _tokenized_keyword = _tokenized_keyword_list[0][3];
+        if(this.flagWords.Count == 0){
+            return false;
+        }
         int num = 0;
+
         for(int i = 0; i < this.flagWords.Count; i++){
             if(this.flagWords[i].keyword == _tokenized_keyword){
                 bool _temp = this.flagWords[i].isExist;
@@ -164,8 +182,8 @@ public class DictationScript : MonoBehaviour{
                 break;
             }
         }
-        Debug.Log("check flag word: "+this.flagWords[num].isExist);
-        return false;
+        // Debug.Log("check flag word: "+this.flagWords[num].isExist);
+        return this.flagWords[num].isExist;
     }
     public bool DeleteFlagWord(string _keyword){
         List<string[]> _tokenized_keyword_list = mecab.Parse(_keyword);
@@ -197,4 +215,18 @@ public class DictationScript : MonoBehaviour{
         }
     }
     //*/
+
+    private void OnApplicationFocus(bool focusStatus) {
+        if(focusStatus == true){
+            Debug.Log("アプリが選択されたんで音声認識を起動");
+            if(this.m_DictationRecognizer.Status == SpeechSystemStatus.Stopped){
+                this.m_DictationRecognizer.Start();
+            }
+        }else{
+            Debug.Log("アプリが選択されなくなったんで音声認識を停止");
+            if(this.m_DictationRecognizer.Status == SpeechSystemStatus.Running){
+                this.m_DictationRecognizer.Stop();
+            }
+        }
+    }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 
 public class GameController_EASY : MonoBehaviour{
-    //[SerializeField]
+    [SerializeField]
     private Animator animator = null;
 
     private DictationScript dict_script = null;
@@ -16,7 +16,9 @@ public class GameController_EASY : MonoBehaviour{
 
     //
     // wait = "Wait" State
-    // training = Tag:"Training" State
+    // training_1 = "Training_1" State
+    // training_2 = "Training_2" State
+    // training_3 = "Training_3" State
     // finish = "Exit" State
     [SerializeField]
     private string status = "wait";
@@ -25,9 +27,9 @@ public class GameController_EASY : MonoBehaviour{
         Debug.Log("GameController_EASY.Start()");
 
         // get component
-        animator = this.GetComponent<Animator>();
+        //animator = this.GetComponent<Animator>();
         dict_script = this.GetComponent<DictationScript>();
-        dict_script.AddFlagWord("ハジメル");
+        dict_script.AddFlagWord("始める");
     }
 
     // Update is called once per frame
@@ -44,26 +46,44 @@ public class GameController_EASY : MonoBehaviour{
         switch(this.status){
             case "wait":
                 if(dict_script.CheckFlagWord("始める") == true){
-                    this.status = "training";
+                    this.status = "training_1";
                     dict_script.DeleteFlagWord("始める");
                     dict_script.AddFlagWord("次");
                     animator.SetTrigger("Training_Start");
+                    Debug.Log("next status ->"+this.status);
                 }
                 break;
-            case "training":
+            case "training_1":
                 if(dict_script.CheckFlagWord("次") == true){
-                    //status = "training";
+                    this.status = "training_2";
                     dict_script.DeleteFlagWord("次");
-                    dict_script.CheckFlagWord("次");
-                    animator.SetTrigger("Next_Training");
+                    dict_script.AddFlagWord("次");
+                    animator.SetTrigger("Next_Training_1");
+                    Debug.Log("next status ->"+this.status);
                 }
-                if(animator.GetCurrentAnimatorStateInfo(0).IsTag("Training") == false){
-                    Debug.Log("Training Finish");
-                    this.status = "finished";
+                break;
+            case "training_2":
+                if(dict_script.CheckFlagWord("次") == true){
+                    this.status = "training_3";
+                    dict_script.DeleteFlagWord("次");
+                    dict_script.AddFlagWord("終わり");
+                    animator.SetTrigger("Next_Training_2");
+                    Debug.Log("next status ->"+this.status);
                 }
+                break;
+            case "training_3":
+                if(dict_script.CheckFlagWord("終わり") == true){
+                    this.status = "finish";
+                    dict_script.DeleteFlagWord("終わり");
+                    animator.SetTrigger("Next_Training_3");
+                    Debug.Log("next status ->"+this.status);
+                }
+                break;
+            case "finish":
+
                 break;
             default:
-                Debug.LogWarning("undefined status");
+                Debug.LogWarning("undefined status : "+this.status);
                 break;
         }
     }
