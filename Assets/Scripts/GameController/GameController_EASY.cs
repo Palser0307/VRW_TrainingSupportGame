@@ -13,6 +13,7 @@ public class GameController_EASY : MonoBehaviour{
 
     public TextMeshProUGUI score_panel = null;
     public TextMeshProUGUI status_panel = null;
+    public TextMeshProUGUI state_panel = null;
 
     //
     // wait = "Wait" State
@@ -22,6 +23,11 @@ public class GameController_EASY : MonoBehaviour{
     // finish = "Exit" State
     [SerializeField]
     private string status = "wait";
+
+    // 空かCLEAR!!かが入る
+    [SerializeField]
+    private string[] state_cleared = {/*start*/"", /*PushUp*/"", /*SitUp*/"", /*Squat*/"", /*finish*/""};
+    private string nextkeyword = "";
 
     [SerializeField]
     private bool forceNextNode = false;
@@ -33,6 +39,7 @@ public class GameController_EASY : MonoBehaviour{
         //animator = this.GetComponent<Animator>();
         dict_script = this.GetComponent<DictationScript>();
         dict_script.AddFlagWord("始める");
+        this.nextkeyword = "始める";
     }
 
     // Update is called once per frame
@@ -45,6 +52,7 @@ public class GameController_EASY : MonoBehaviour{
         }
 
         this.status_panel.text = this.status;
+        Update_StatePanel();
 
         switch(this.status){
             case "wait":
@@ -53,7 +61,9 @@ public class GameController_EASY : MonoBehaviour{
                     this.status = "training_1";
                     dict_script.DeleteFlagWord("始める");
                     dict_script.AddFlagWord("次");
+                    this.nextkeyword = "次";
                     animator.SetTrigger("Training_Start");
+                    this.state_cleared[0] = "checked";
                     Debug.Log("next status ->"+this.status);
                 }
                 break;
@@ -63,7 +73,9 @@ public class GameController_EASY : MonoBehaviour{
                     this.status = "training_2";
                     dict_script.DeleteFlagWord("次");
                     dict_script.AddFlagWord("次");
+                    this.nextkeyword = "次";
                     animator.SetTrigger("Next_Training_1");
+                    this.state_cleared[1] = "CLEAR";
                     Debug.Log("next status ->"+this.status);
                 }
                 break;
@@ -73,7 +85,9 @@ public class GameController_EASY : MonoBehaviour{
                     this.status = "training_3";
                     dict_script.DeleteFlagWord("次");
                     dict_script.AddFlagWord("終わり");
+                    this.nextkeyword = "終わり";
                     animator.SetTrigger("Next_Training_2");
+                    this.state_cleared[2] = "CLEAR";
                     Debug.Log("next status ->"+this.status);
                 }
                 break;
@@ -83,16 +97,27 @@ public class GameController_EASY : MonoBehaviour{
                     this.status = "finish";
                     dict_script.DeleteFlagWord("終わり");
                     animator.SetTrigger("Next_Training_3");
+                    this.state_cleared[3] = "CLEAR";
                     Debug.Log("next status ->"+this.status);
                 }
                 break;
             case "finish":
-
+                    this.state_cleared[4] = "finish";
                 break;
             default:
                 Debug.LogWarning("undefined status : "+this.status);
                 break;
         }
+    }
+
+    void Update_StatePanel(){
+        this.state_panel.text
+            = "next keyword->" + this.nextkeyword + "\n"
+            + "はじめ:" + this.state_cleared[0] + "\n"
+            + "腕立て伏せ:" + this.state_cleared[1] + "\n"
+            + "上体起こし:" + this.state_cleared[2] + "\n"
+            + "スクワット:" + this.state_cleared[3] + "\n"
+            + "おわり:" + this.state_cleared[4];
     }
 }
 /*
@@ -222,6 +247,5 @@ public class SmartBall_ctrl : GameController_Script{
         _ball_Obj.GetComponent<Rigidbody>().AddForce(Vector3.up * randPower, ForceMode.Impulse);
     }
 }
-
 
 */
