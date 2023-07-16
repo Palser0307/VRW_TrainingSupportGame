@@ -133,6 +133,7 @@ public class DictationScript : MonoBehaviour{
         this.m_DictationRecognizer.Start();
     }
 
+    // 止まってたら再起動を繰り返す
     void Update() {
         if(this.m_DictationRecognizer.Status == SpeechSystemStatus.Stopped){
             this.m_DictationRecognizer.Start();
